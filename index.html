@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Porquinho no Labirinto</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #100d17;
+      --panel: #1a1425;
+      --violet: #a86bff;
+      --violet-light: #d2adff;
+      --violet-dark: #572b91;
+      --pink: #ff9ebd;
+      --text: #f4efff;
+      --muted: #b6a9c9;
+      --border: #493460;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(ellipse at 50% 15%, #26183a 0%, transparent 48%),
+        var(--bg);
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+
+    button { font: inherit; }
+
+    .app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header, footer {
+      width: min(100%, 980px);
+      margin: 0 auto;
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    header { border-bottom: 1px solid #ffffff14; }
+
+    footer {
+      justify-content: center;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: .14em;
+      text-align: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .12em;
+    }
+
+    .brand-pig { font-size: 24px; }
+    .brand span:last-child { color: var(--muted); }
+    .header-star { color: var(--violet-light); font-size: 24px; }
+
+    main {
+      flex: 1;
+      width: min(100%, 760px);
+      margin: 0 auto;
+      padding: 32px 18px 42px;
+      display: grid;
+      place-items: center;
+    }
+
+    .screen {
+      width: min(100%, 570px);
+      text-align: center;
+      animation: enter .35s ease-out;
+    }
+
+    [hidden] { display: none !important; }
+
+    .eyebrow {
+      color: var(--violet-light);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, p { margin-top: 0; }
+
+    h1 {
+      margin-bottom: 12px;
+      font-size: clamp(30px, 7vw, 52px);
+      line-height: 1.15;
+      letter-spacing: -.04em;
+    }
+
+    h1 span { color: var(--violet-light); }
+
+    .intro {
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 22px;
+    }
+
+    .hero-scene {
+      position: relative;
+      width: min(100%, 430px);
+      height: 155px;
+      margin: 22px auto;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background:
+        radial-gradient(circle at 15% 22%, #d2adff 0 2px, transparent 3px),
+        radial-gradient(circle at 27% 44%, #a86bff 0 2px, transparent 3px),
+        radial-gradient(circle at 83% 20%, #d2adff 0 2px, transparent 3px),
+        radial-gradient(circle at 67% 31%, #a86bff 0 2px, transparent 3px),
+        linear-gradient(180deg, #21162f, #120e19);
+    }
+
+    .hero-ground {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 28px;
+      background: repeating-linear-gradient(90deg, #532d7c 0 18px, #6e3ca3 18px 36px);
+      border-top: 5px solid var(--violet);
+    }
+
+    .hero-pig {
+      position: absolute;
+      left: 29%;
+      bottom: 25px;
+      font-size: 50px;
+      image-rendering: pixelated;
+      animation: bob 1.2s steps(2) infinite;
+    }
+
+    .hero-portal {
+      position: absolute;
+      right: 17%;
+      bottom: 25px;
+      width: 46px;
+      height: 70px;
+      border: 6px solid var(--violet-light);
+      border-bottom: 0;
+      border-radius: 25px 25px 0 0;
+      box-shadow: 0 0 18px #b77cff99;
+    }
+
+    .hero-portal::after {
+      content: "✦";
+      color: white;
+      font-size: 22px;
+      position: absolute;
+      top: 18px;
+      left: 7px;
+      animation: twinkle 1s steps(2) infinite;
+    }
+
+    .primary, .secondary {
+      min-height: 48px;
+      padding: 12px 20px;
+      border: 2px solid var(--violet-light);
+      border-radius: 7px;
+      background: var(--violet);
+      color: #160d20;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 5px 0 var(--violet-dark);
+      transition: transform .12s, filter .12s;
+    }
+
+    .primary:hover, .secondary:hover { filter: brightness(1.12); }
+
+    .primary:active, .secondary:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 var(--violet-dark);
+    }
+
+    .secondary {
+      background: #241a32;
+      color: var(--text);
+    }
+
+    .facts {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px 22px;
+      margin: 20px 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .instructions {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .journey {
+      width: min(100%, 380px);
+      margin: 18px auto;
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .journey::before {
+      content: "";
+      position: absolute;
+      height: 2px;
+      left: 17px;
+      right: 17px;
+      top: 16px;
+      background: var(--border);
+    }
+
+    .step {
+      position: relative;
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--border);
+      background: var(--bg);
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .step.done {
+      background: var(--violet);
+      border-color: var(--violet);
+      color: #160d20;
+    }
+
+    .step.current {
+      border-color: var(--violet-light);
+      color: var(--violet-light);
+    }
+
+    .game-screen { width: min(100%, 500px); }
+
+    .level-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      text-align: left;
+    }
+
+    .level-heading h1 {
+      margin: 6px 0;
+      font-size: clamp(20px, 5vw, 28px);
+    }
+
+    .level-heading p {
+      color: var(--muted);
+      margin: 0;
+      font-size: 14px;
+    }
+
+    .level-icon {
+      font-size: 36px;
+      color: var(--violet-light);
+    }
+
+    .maze-info {
+      display: flex;
+      justify-content: space-between;
+      margin: 18px 0 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .board-wrap {
+      width: min(100%, 480px);
+      margin: 0 auto;
+      padding: 7px;
+      border: 2px solid var(--violet-light);
+      border-radius: 8px;
+      background: #09070d;
+      box-shadow: 0 0 24px #9d58ff30, 5px 5px 0 #45246a;
+      position: relative;
+    }
+
+    #maze {
+      display: block;
+      width: 100%;
+      height: auto;
+      image-rendering: pixelated;
+      border-radius: 3px;
+    }
+
+    .success {
+      position: absolute;
+      inset: 7px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 16px;
+      background: #100d17ed;
+      border-radius: 3px;
+      animation: enter .25s ease-out;
+    }
+
+    .success .pig-large { font-size: 48px; }
+    .success h2 { margin: 0; font-size: 20px; }
+    .success p { margin: 0; color: var(--muted); font-size: 14px; }
+
+    .feedback {
+      min-height: 28px;
+      margin: 12px 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .controls {
+      width: 190px;
+      margin: 10px auto 4px;
+      display: grid;
+      grid-template-columns: repeat(3, 58px);
+      grid-template-rows: repeat(2, 54px);
+      gap: 7px;
+      justify-content: center;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .direction {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #21182e;
+      color: var(--violet-light);
+      font-size: 24px;
+      font-weight: 900;
+      cursor: pointer;
+      touch-action: none;
+      box-shadow: 0 3px 0 #0a0710;
+    }
+
+    .direction:active {
+      background: var(--violet);
+      color: #160d20;
+    }
+
+    .up { grid-area: 1 / 2; }
+    .left { grid-area: 2 / 1; }
+    .down { grid-area: 2 / 2; }
+    .right { grid-area: 2 / 3; }
+
+    .deck-screen .journey { margin-top: 22px; }
+
+    .deck-table {
+      height: 260px;
+      width: min(100%, 430px);
+      margin: 12px auto 0;
+      position: relative;
+      perspective: 900px;
+    }
+
+    .card-choice {
+      position: absolute;
+      top: 27px;
+      left: 50%;
+      width: 116px;
+      height: 178px;
+      padding: 0;
+      border: 2px solid var(--violet-light);
+      border-radius: 10px;
+      background: repeating-linear-gradient(45deg, #241634 0 9px, #38204d 9px 18px);
+      color: var(--violet-light);
+      cursor: pointer;
+      box-shadow: 4px 5px 0 #07050b, 0 0 20px #9d58ff22;
+      transform: translateX(-50%);
+      transition: transform .7s cubic-bezier(.2,.8,.2,1), opacity .3s;
+    }
+
+    .card-choice::before {
+      content: "✦";
+      position: absolute;
+      inset: 8px;
+      border: 1px solid var(--violet);
+      display: grid;
+      place-items: center;
+      font-size: 34px;
+    }
+
+    .card-choice::after {
+      content: "?";
+      position: absolute;
+      top: 67px;
+      left: 0;
+      right: 0;
+      font-size: 38px;
+      font-weight: 900;
+    }
+
+    .card-choice:nth-child(1) { z-index: 1; }
+    .card-choice:nth-child(2) { z-index: 2; }
+    .card-choice:nth-child(3) { z-index: 3; }
+
+    .deck-table.dealt .card-choice:nth-child(1) {
+      transform: translateX(calc(-50% - 130px)) rotate(-10deg);
+    }
+
+    .deck-table.dealt .card-choice:nth-child(2) {
+      transform: translateX(-50%) translateY(-8px);
+    }
+
+    .deck-table.dealt .card-choice:nth-child(3) {
+      transform: translateX(calc(-50% + 130px)) rotate(10deg);
+    }
+
+    .deck-table.picked .card-choice { opacity: .15; }
+
+    .deck-table.picked .card-choice.selected {
+      opacity: 1;
+      z-index: 5;
+      transform: translateX(-50%) translateY(-10px) rotateY(180deg) scale(1.08);
+    }
+
+    .deck-prompt {
+      min-height: 22px;
+      color: var(--violet-light);
+      font-weight: 800;
+    }
+
+    .message-card {
+      width: min(100%, 370px);
+      min-height: 270px;
+      margin: 26px auto;
+      padding: 35px 25px;
+      border: 2px solid var(--violet-light);
+      border-radius: 10px;
+      background: linear-gradient(145deg, #241832, #17111f);
+      box-shadow: 5px 6px 0 #45246a;
+      animation: reveal .55s cubic-bezier(.2,.8,.2,1);
+    }
+
+    .message-icon {
+      color: var(--pink);
+      font-size: 50px;
+      margin: 2px 0 12px;
+    }
+
+    .message-card h2 {
+      color: var(--violet-light);
+      font-size: 18px;
+    }
+
+    .message-card p {
+      color: var(--text);
+      line-height: 1.8;
+      font-size: 16px;
+    }
+
+    @keyframes enter {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes reveal {
+      from { opacity: 0; transform: scale(.75) rotate(-5deg); }
+      to { opacity: 1; transform: scale(1) rotate(0); }
+    }
+
+    @keyframes bob {
+      50% { transform: translateY(-5px); }
+    }
+
+    @keyframes twinkle {
+      50% { opacity: .35; }
+    }
+
+    @media (max-width: 500px) {
+      header, footer {
+        padding-left: 15px;
+        padding-right: 15px;
+      }
+
+      main { padding: 25px 14px 32px; }
+      .card-choice { width: 92px; height: 150px; }
+      .deck-table { height: 225px; }
+
+      .deck-table.dealt .card-choice:nth-child(1) {
+        transform: translateX(calc(-50% - 99px)) rotate(-9deg);
+      }
+
+      .deck-table.dealt .card-choice:nth-child(3) {
+        transform: translateX(calc(-50% + 99px)) rotate(9deg);
+      }
+
+      .deck-table.picked .card-choice.selected {
+        transform: translateX(-50%) translateY(-8px) rotateY(180deg) scale(1.1);
+      }
+
+      footer { font-size: 9px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand"><span class="brand-pig">🐷</span> PORQUINHO <span>/ LABIRINTO</span></div>
+      <div class="header-star" aria-hidden="true">✦</div>
+    </header>
+
+    <main>
+      <section id="startScreen" class="screen">
+        <div class="eyebrow">✦ Uma pequena aventura ✦</div>
+        <h1>Porquinho no<br><span>Labirinto</span></h1>
+        <p class="intro">Cinco caminhos. Uma surpresa.<br>Um porquinho pronto para descobrir.</p>
+
+        <div class="hero-scene" aria-hidden="true">
+          <div class="hero-pig">🐷</div>
+          <div class="hero-portal"></div>
+          <div class="hero-ground"></div>
+        </div>
+
+        <button id="startButton" class="primary">COMEÇAR A AVENTURA　➜</button>
+        <div class="facts"><span>✦ 5 níveis</span><span>✧ 3 cartas surpresa</span></div>
+        <p class="instructions">Use as setas da tela ou do teclado para chegar ao portal.<br>Sem inimigos, sem tempo limite. No seu ritmo.</p>
+        <div id="startJourney" class="journey" aria-label="Progresso dos cinco níveis"></div>
+      </section>
+
+      <section id="gameScreen" class="screen game-screen" hidden>
+        <div class="level-heading">
+          <div>
+            <div id="levelLabel" class="eyebrow">NÍVEL 1 DE 5</div>
+            <h1 id="levelName">Jardim Violeta</h1>
+            <p id="levelDetail">Um pequeno começo</p>
+          </div>
+          <div id="levelIcon" class="level-icon" aria-hidden="true">✿</div>
+        </div>
+
+        <div id="gameJourney" class="journey" aria-label="Progresso dos cinco níveis"></div>
+        <div class="maze-info"><span>🚪 Encontre o portal</span><span><span id="steps">0</span> passos</span></div>
+
+        <div class="board-wrap">
+          <canvas id="maze" width="480" height="480" aria-label="Labirinto"></canvas>
+          <div id="success" class="success" hidden>
+            <div class="pig-large">🐷</div>
+            <h2 id="successTitle">Portal encontrado!</h2>
+            <p id="successText">Mais um caminho conquistado.</p>
+            <button id="continueButton" class="primary">PRÓXIMO NÍVEL　➜</button>
+          </div>
+        </div>
+
+        <div id="feedback" class="feedback" aria-live="polite">Até os caminhos de volta fazem parte da aventura.</div>
+
+        <div class="controls" aria-label="Controles do porquinho">
+          <button class="direction up" data-dx="0" data-dy="-1" aria-label="Mover para cima">▲</button>
+          <button class="direction left" data-dx="-1" data-dy="0" aria-label="Mover para esquerda">◀</button>
+          <button class="direction down" data-dx="0" data-dy="1" aria-label="Mover para baixo">▼</button>
+          <button class="direction right" data-dx="1" data-dy="0" aria-label="Mover para direita">▶</button>
+        </div>
+
+        <p class="instructions">Toque nas setas ou segure para caminhar.<br>No computador, use as setas do teclado.</p>
+      </section>
+
+      <section id="deckScreen" class="screen deck-screen" hidden>
+        <div class="eyebrow">✦ Cinco caminhos conquistados ✦</div>
+        <h1>Sua surpresa<br><span>está aqui.</span></h1>
+        <p class="intro">Três cartas. Uma mensagem especial.<br>Qual delas chama por você?</p>
+        <div id="deckJourney" class="journey" aria-label="Cinco níveis concluídos"></div>
+
+        <div id="deckTable" class="deck-table">
+          <button class="card-choice" aria-label="Escolher carta do coração"></button>
+          <button class="card-choice" aria-label="Escolher carta da estrela"></button>
+          <button class="card-choice" aria-label="Escolher carta da lua"></button>
+        </div>
+
+        <p id="deckPrompt" class="deck-prompt">Escolha uma carta</p>
+        <p class="instructions">Uma carta por aventura. Para escolher outra,<br>jogue os cinco níveis novamente.</p>
+      </section>
+
+      <section id="messageScreen" class="screen" hidden>
+        <div class="eyebrow">✓ Aventura concluída</div>
+        <h1>Uma mensagem<br><span>só para você.</span></h1>
+        <article id="messageCard" class="message-card"></article>
+        <p class="instructions">Para escolher outra carta, complete os cinco níveis novamente.</p>
+        <button id="replayButton" class="primary">↻　JOGAR DE NOVO</button>
+      </section>
+    </main>
+
+    <footer><span>FEITO DE PIXELS & CARINHO</span><span>✦</span><span>VÁ NO SEU RITMO</span></footer>
+  </div>
+
+  <script>
+    const levels = [
+      { size: 4, name: "Jardim Violeta", detail: "Um pequeno começo", symbol: "✿" },
+      { size: 5, name: "Bosque das Luzes", detail: "Siga o seu caminho", symbol: "✦" },
+      { size: 6, name: "Gruta de Cristal", detail: "Cada passo é uma descoberta", symbol: "◆" },
+      { size: 7, name: "Castelo da Lua", detail: "A surpresa está mais perto", symbol: "☾" },
+      { size: 8, name: "Portal das Estrelas", detail: "Só mais um labirinto!", symbol: "★" }
+    ];
+
+    const cards = [
+      {
+        title: "Carta do Coração",
+        icon: "♥",
+        message: "Você é uma pessoa incrível! Nunca esqueça o quanto é especial e querida."
+      },
+      {
+        title: "Carta da Estrela",
+        icon: "★",
+        message: "Seus sonhos são possíveis. Continue brilhando, o melhor ainda está por vir!"
+      },
+      {
+        title: "Carta da Lua",
+        icon: "☾",
+        message: "Que seus dias sejam cheios de alegria, risadas e muitos abraços apertados."
+      }
+    ];
+
+    const views = {
+      start: document.getElementById("startScreen"),
+      game: document.getElementById("gameScreen"),
+      deck: document.getElementById("deckScreen"),
+      message: document.getElementById("messageScreen")
+    };
+
+    const canvas = document.getElementById("maze");
+    const ctx = canvas.getContext("2d");
+
+    const pigPixels = [
+      ".P....P.",
+      ".PPPPPP.",
+      "PPPPPPPP",
+      "PEPPPPEP",
+      "PPPSSPPP",
+      "PPSNNSPP",
+      ".PPPPPP.",
+      ".P.PP.P."
+    ];
+
+    let currentLevel = 0;
+    let maze = [];
+    let position = { x: 1, y: 1 };
+    let trail = new Set();
+    let stepCount = 0;
+    let won = false;
+    let selectedCard = null;
+    let holdTimer = null;
+    let holdInterval = null;
+    let heldLongEnough = false;
+    let dealingTimer = null;
+
+    function showView(name) {
+      Object.entries(views).forEach(([key, view]) => {
+        view.hidden = key !== name;
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function fillJourney(element, completed) {
+      element.innerHTML = "";
+
+      for (let i = 0; i < 5; i++) {
+        const step = document.createElement("span");
+        step.className = "step" + (
+          i < completed ? " done" :
+          i === completed ? " current" : ""
+        );
+        step.textContent = i < completed ? "✓" : String(i + 1);
+        step.setAttribute(
+          "aria-label",
+          "Nível " + (i + 1) + (i < completed ? " concluído" : "")
+        );
+        element.appendChild(step);
+      }
+    }
+
+    function makeMaze(size) {
+      const gridSize = size * 2 + 1;
+      const grid = Array.from(
+        { length: gridSize },
+        () => Array(gridSize).fill(true)
+      );
+
+      grid[1][1] = false;
+
+      const visited = new Set(["0,0"]);
+      const stack = [[0, 0]];
+      const directions = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+
+      while (stack.length) {
+        const [cx, cy] = stack[stack.length - 1];
+
+        const neighbors = directions
+          .map(([dx, dy]) => [cx + dx, cy + dy, dx, dy])
+          .filter(([x, y]) =>
+            x >= 0 &&
+            y >= 0 &&
+            x < size &&
+            y < size &&
+            !visited.has(x + "," + y)
+          );
+
+        if (!neighbors.length) {
+          stack.pop();
+          continue;
+        }
+
+        const [nx, ny, dx, dy] =
+          neighbors[Math.floor(Math.random() * neighbors.length)];
+
+        visited.add(nx + "," + ny);
+        grid[cy * 2 + 1 + dy][cx * 2 + 1 + dx] = false;
+        grid[ny * 2 + 1][nx * 2 + 1] = false;
+        stack.push([nx, ny]);
+      }
+
+      return grid;
+    }
+
+    function drawPig(x, y, tile) {
+      const pixel = tile / 8;
+      const startX = x * tile;
+      const startY = y * tile;
+
+      const colors = {
+        P: "#ff9ebd",
+        E: "#100d17",
+        S: "#ed6f9e",
+        N: "#7e294e"
+      };
+
+      pigPixels.forEach((row, py) => {
+        [...row].forEach((cell, px) => {
+          if (cell !== ".") {
+            ctx.fillStyle = colors[cell];
+            ctx.fillRect(
+              Math.floor(startX + px * pixel),
+              Math.floor(startY + py * pixel),
+              Math.ceil(pixel),
+              Math.ceil(pixel)
+            );
+          }
+        });
+      });
+    }
+
+    function drawMaze() {
+      if (!maze.length) return;
+
+      const gridSize = maze.length;
+      const tile = canvas.width / gridSize;
+
+      const wallColors = [
+        ["#572b91", "#a86bff"],
+        ["#633a9f", "#bd8dff"],
+        ["#50327c", "#d2adff"],
+        ["#65368f", "#b882ff"],
+        ["#60319b", "#d2adff"]
+      ];
+
+      const [wallColor, highlight] = wallColors[currentLevel];
+
+      ctx.fillStyle = "#100d17";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      for (let y = 0; y < gridSize; y++) {
+        for (let x = 0; x < gridSize; x++) {
+          if (maze[y][x]) {
+            ctx.fillStyle = wallColor;
+            ctx.fillRect(
+              x * tile + 1,
+              y * tile + 1,
+              tile - 2,
+              tile - 2
+            );
+
+            ctx.fillStyle = highlight;
+            ctx.fillRect(
+              x * tile + 2,
+              y * tile + 2,
+              tile - 4,
+              Math.max(2, tile * .12)
+            );
+
+            ctx.fillStyle = "#321b50";
+            ctx.fillRect(
+              x * tile + 2,
+              y * tile + tile * .82,
+              tile - 4,
+              Math.max(2, tile * .1)
+            );
+
+            if ((x + y) % 4 === 0) {
+              ctx.fillStyle = "#d2adff88";
+              ctx.fillRect(
+                x * tile + tile * .72,
+                y * tile + tile * .42,
+                Math.max(2, tile * .08),
+                Math.max(2, tile * .08)
+              );
+            }
+          } else {
+            ctx.fillStyle = "#100d17";
+            ctx.fillRect(x * tile, y * tile, tile, tile);
+
+            if ((x * 3 + y) % 11 === 0) {
+              ctx.fillStyle = "#a86bff55";
+              ctx.font = Math.max(8, tile * .42) + "px serif";
+              ctx.textAlign = "center";
+              ctx.fillText(
+                levels[currentLevel].symbol,
+                x * tile + tile / 2,
+                y * tile + tile * .68
+              );
+            }
+          }
+        }
+      }
+
+      trail.forEach(point => {
+        const [x, y] = point.split(",").map(Number);
+        ctx.fillStyle = "#a86bff55";
+        ctx.fillRect(
+          x * tile + tile * .4,
+          y * tile + tile * .4,
+          tile * .2,
+          tile * .2
+        );
+      });
+
+      const goalX = gridSize - 2;
+      const goalY = gridSize - 2;
+
+      ctx.fillStyle = "#d2adff";
+      ctx.fillRect(
+        goalX * tile + tile * .18,
+        goalY * tile + tile * .12,
+        tile * .64,
+        tile * .84
+      );
+
+      ctx.fillStyle = "#241532";
+      ctx.fillRect(
+        goalX * tile + tile * .3,
+        goalY * tile + tile * .31,
+        tile * .42,
+        tile * .65
+      );
+
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(
+        goalX * tile + tile * .57,
+        goalY * tile + tile * .55,
+        Math.max(2, tile * .07),
+        Math.max(2, tile * .07)
+      );
+
+      drawPig(position.x, position.y, tile);
+    }
+
+    function startGame() {
+      currentLevel = 0;
+      selectedCard = null;
+      startLevel();
+    }
+
+    function startLevel() {
+      const config = levels[currentLevel];
+
+      maze = makeMaze(config.size);
+      position = { x: 1, y: 1 };
+      trail = new Set(["1,1"]);
+      stepCount = 0;
+      won = false;
+
+      document.getElementById("levelLabel").textContent =
+        "NÍVEL " + (currentLevel + 1) + " DE 5";
+      document.getElementById("levelName").textContent = config.name;
+      document.getElementById("levelDetail").textContent = config.detail;
+      document.getElementById("levelIcon").textContent = config.symbol;
+      document.getElementById("steps").textContent = "0";
+      document.getElementById("feedback").textContent =
+        "Até os caminhos de volta fazem parte da aventura.";
+      document.getElementById("success").hidden = true;
+      document.getElementById("successTitle").textContent =
+        currentLevel === 4 ? "Você conseguiu!" : "Portal encontrado!";
+      document.getElementById("successText").textContent =
+        (currentLevel + 1) + " de 5 labirintos concluídos";
+      document.getElementById("continueButton").textContent =
+        currentLevel === 4
+          ? "DESCOBRIR AS CARTAS　➜"
+          : "PRÓXIMO NÍVEL　➜";
+
+      fillJourney(document.getElementById("gameJourney"), currentLevel);
+      showView("game");
+      drawMaze();
+    }
+
+    function move(dx, dy) {
+      if (won || !maze.length) return;
+
+      const nextX = position.x + dx;
+      const nextY = position.y + dy;
+
+      if (!maze[nextY] || maze[nextY][nextX] !== false) {
+        document.getElementById("feedback").textContent =
+          "Uma parede! Tente outra direção.";
+        return;
+      }
+
+      position = { x: nextX, y: nextY };
+      stepCount++;
+      trail.add(nextX + "," + nextY);
+
+      document.getElementById("steps").textContent = String(stepCount);
+      document.getElementById("feedback").textContent =
+        "Muito bem! Continue procurando o portal.";
+
+      drawMaze();
+
+      if (nextX === maze.length - 2 && nextY === maze.length - 2) {
+        won = true;
+        document.getElementById("feedback").textContent =
+          "Labirinto concluído!";
+        document.getElementById("success").hidden = false;
+      }
+    }
+
+    document.getElementById("startButton").addEventListener("click", startGame);
+
+    document.getElementById("continueButton").addEventListener("click", () => {
+      if (currentLevel < levels.length - 1) {
+        currentLevel++;
+        startLevel();
+      } else {
+        showDeck();
+      }
+    });
+
+    document.getElementById("replayButton").addEventListener("click", startGame);
+
+    function showDeck() {
+      fillJourney(document.getElementById("deckJourney"), 5);
+      showView("deck");
+
+      const table = document.getElementById("deckTable");
+      const prompt = document.getElementById("deckPrompt");
+      const buttons = [...table.querySelectorAll(".card-choice")];
+
+      table.classList.remove("dealt", "picked");
+
+      buttons.forEach(button => {
+        button.classList.remove("selected");
+        button.disabled = false;
+      });
+
+      prompt.textContent = "Escolha uma carta";
+
+      clearTimeout(dealingTimer);
+      dealingTimer = setTimeout(() => {
+        table.classList.add("dealt");
+      }, 300);
+
+      buttons.forEach((button, index) => {
+        button.onclick = () => {
+          if (selectedCard !== null) return;
+
+          selectedCard = index;
+          button.classList.add("selected");
+          table.classList.add("picked");
+          buttons.forEach(cardButton => {
+            cardButton.disabled = true;
+          });
+
+          prompt.textContent = "Revelando sua mensagem…";
+
+          setTimeout(() => showMessage(index), 900);
+        };
+      });
+    }
+
+    function showMessage(index) {
+      const card = cards[index];
+      const article = document.getElementById("messageCard");
+
+      article.innerHTML =
+        '<div class="message-icon" aria-hidden="true">' + card.icon + '</div>' +
+        '<div class="eyebrow">SUA CARTA ESPECIAL</div>' +
+        '<h2>' + card.title + '</h2>' +
+        '<p>' + card.message + '</p>';
+
+      showView("message");
+    }
+
+    document.querySelectorAll(".direction").forEach(button => {
+      const dx = Number(button.dataset.dx);
+      const dy = Number(button.dataset.dy);
+
+      button.addEventListener("pointerdown", event => {
+        event.preventDefault();
+        clearTimeout(holdTimer);
+        clearInterval(holdInterval);
+        heldLongEnough = false;
+
+        try {
+          button.setPointerCapture(event.pointerId);
+        } catch (_) {}
+
+        holdTimer = setTimeout(() => {
+          heldLongEnough = true;
+          move(dx, dy);
+          holdInterval = setInterval(() => move(dx, dy), 155);
+        }, 280);
+      });
+
+      const stopHolding = () => {
+        clearTimeout(holdTimer);
+        clearInterval(holdInterval);
+        holdTimer = null;
+        holdInterval = null;
+
+        if (!heldLongEnough) move(dx, dy);
+      };
+
+      button.addEventListener("pointerup", stopHolding);
+      button.addEventListener("pointercancel", stopHolding);
+
+      button.addEventListener("lostpointercapture", () => {
+        clearTimeout(holdTimer);
+        clearInterval(holdInterval);
+      });
+
+      button.addEventListener("click", event => {
+        if (event.detail === 0) move(dx, dy);
+      });
+    });
+
+    window.addEventListener("keydown", event => {
+      if (views.game.hidden) return;
+
+      const directions = {
+        ArrowUp: [0, -1],
+        ArrowDown: [0, 1],
+        ArrowLeft: [-1, 0],
+        ArrowRight: [1, 0]
+      };
+
+      if (directions[event.key]) {
+        event.preventDefault();
+        if (!event.repeat) move(...directions[event.key]);
+      }
+    });
+
+    fillJourney(document.getElementById("startJourney"), 0);
+  </script>
+</body>
+</html>
