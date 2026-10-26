@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
+<html lang="pt-BR"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Porquinho no Labirinto</title>
@@ -543,10 +541,10 @@
         <button id="startButton" class="primary">COMEÇAR A AVENTURA　➜</button>
         <div class="facts"><span>✦ 5 níveis</span><span>✧ 3 cartas surpresa</span></div>
         <p class="instructions">Use as setas da tela ou do teclado para chegar ao portal.<br>Sem inimigos, sem tempo limite. No seu ritmo.</p>
-        <div id="startJourney" class="journey" aria-label="Progresso dos cinco níveis"></div>
+        <div id="startJourney" class="journey" aria-label="Progresso dos cinco níveis"><span class="step current" aria-label="Nível 1">1</span><span class="step" aria-label="Nível 2">2</span><span class="step" aria-label="Nível 3">3</span><span class="step" aria-label="Nível 4">4</span><span class="step" aria-label="Nível 5">5</span></div>
       </section>
 
-      <section id="gameScreen" class="screen game-screen" hidden>
+      <section id="gameScreen" class="screen game-screen" hidden="">
         <div class="level-heading">
           <div>
             <div id="levelLabel" class="eyebrow">NÍVEL 1 DE 5</div>
@@ -561,7 +559,7 @@
 
         <div class="board-wrap">
           <canvas id="maze" width="480" height="480" aria-label="Labirinto"></canvas>
-          <div id="success" class="success" hidden>
+          <div id="success" class="success" hidden="">
             <div class="pig-large">🐷</div>
             <h2 id="successTitle">Portal encontrado!</h2>
             <p id="successText">Mais um caminho conquistado.</p>
@@ -581,7 +579,7 @@
         <p class="instructions">Toque nas setas ou segure para caminhar.<br>No computador, use as setas do teclado.</p>
       </section>
 
-      <section id="deckScreen" class="screen deck-screen" hidden>
+      <section id="deckScreen" class="screen deck-screen" hidden="">
         <div class="eyebrow">✦ Cinco caminhos conquistados ✦</div>
         <h1>Sua surpresa<br><span>está aqui.</span></h1>
         <p class="intro">Três cartas. Uma mensagem especial.<br>Qual delas chama por você?</p>
@@ -594,19 +592,20 @@
         </div>
 
         <p id="deckPrompt" class="deck-prompt">Escolha uma carta</p>
-        <p class="instructions">Uma carta por aventura. Para escolher outra,<br>jogue os cinco níveis novamente.</p>
+        <p class="instructions">Você pode voltar e escolher outra carta quando quiser.</p>
       </section>
 
-      <section id="messageScreen" class="screen" hidden>
+      <section id="messageScreen" class="screen" hidden="">
         <div class="eyebrow">✓ Aventura concluída</div>
         <h1>Uma mensagem<br><span>só para você.</span></h1>
         <article id="messageCard" class="message-card"></article>
-        <p class="instructions">Para escolher outra carta, complete os cinco níveis novamente.</p>
+        <p class="instructions">Você pode voltar às cartas e escolher outra surpresa.</p>
+        <button id="backToCardsButton" class="secondary">←　VOLTAR ÀS CARTAS</button>
         <button id="replayButton" class="primary">↻　JOGAR DE NOVO</button>
       </section>
     </main>
 
-    <footer><span>FEITO DE PIXELS & CARINHO</span><span>✦</span><span>VÁ NO SEU RITMO</span></footer>
+    <footer><span>FEITO DE PIXELS &amp; CARINHO</span><span>✦</span><span>VÁ NO SEU RITMO</span></footer>
   </div>
 
   <script>
@@ -959,6 +958,11 @@
 
     document.getElementById("replayButton").addEventListener("click", startGame);
 
+    document.getElementById("backToCardsButton").addEventListener("click", () => {
+      selectedCard = null;
+      showDeck();
+    });
+
     function showDeck() {
       fillJourney(document.getElementById("deckJourney"), 5);
       showView("deck");
@@ -1073,5 +1077,6 @@
 
     fillJourney(document.getElementById("startJourney"), 0);
   </script>
-</body>
-</html>
+
+
+</body></html>
